@@ -5,6 +5,7 @@ import '../models/movie.dart';
 import '../widgets/image_preview_widget.dart';
 import '../utils/form_validators.dart';
 import '../constants/movie_constants.dart';
+import '../services/movie_service.dart';
 
 class MovieRegistrationScreen extends StatefulWidget {
   const MovieRegistrationScreen({Key? key}) : super(key: key);
@@ -65,38 +66,59 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     _generateMovieId();
   }
 
-  void _saveMovie() {
+  void _saveMovie() async {
     if (_formKey.currentState!.validate()) {
-      final movie = Movie(
-        id: _movieId,
-        title: _titleController.text.trim(),
-        imageUrl: _imageUrlController.text.trim(),
-        genre: _selectedGenre!,
-        ageRating: _selectedAgeRating!,
-        duration: _durationController.text.trim(),
-        year: int.parse(_yearController.text),
-        rating: double.parse(_ratingController.text),
-        description: _descriptionController.text.trim(),
-      );
-      
-      // Aqui você implementaria a lógica de salvamento
-      // Ex: await movieService.saveMovie(movie);
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              const Icon(Icons.check_circle, color: Colors.white),
-              const SizedBox(width: 8),
-              Text('Filme "${movie.title}" cadastrado com sucesso!'),
-            ],
-          ),
-          backgroundColor: Colors.green,
-          duration: const Duration(seconds: 3),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      _clearForm();
+      try {
+        final movie = Movie(
+          id: _movieId,
+          title: _titleController.text.trim(),
+          imageUrl: _imageUrlController.text.trim(),
+          genre: _selectedGenre!,
+          ageRating: _selectedAgeRating!,
+          duration: _durationController.text.trim(),
+          year: int.parse(_yearController.text),
+          rating: double.parse(_ratingController.text),
+          description: _descriptionController.text.trim(),
+        );
+        
+        final movieService = MovieService();
+        await movieService.createMovie(movie);
+        
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.check_circle, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text('Filme "${movie.title}" cadastrado com sucesso!'),
+                ],
+              ),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          _clearForm();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.error, color: Colors.white),
+                  const SizedBox(width: 8),
+                  Text('Erro ao cadastrar filme: ${e.toString()}'),
+                ],
+              ),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
     }
   }
 
