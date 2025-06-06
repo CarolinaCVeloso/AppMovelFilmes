@@ -188,8 +188,58 @@ class _TelaListaFilmesState extends State<TelaListaFilmes> {
               padding: const EdgeInsets.all(16),
               itemCount: filmes.length,
               itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
+                final filme = filmes[index];
+                return Dismissible(
+                  key: Key(filme.id),
+                  direction: DismissDirection.endToStart,
+                  background: Container(
+                    alignment: Alignment.centerRight,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    color: Colors.red,
+                    child: const Icon(Icons.delete, color: Colors.white, size: 32),
+                  ),
+                  confirmDismiss: (direction) async {
+                    return await showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Confirmar exclusão'),
+                        content: Text('Deseja realmente excluir o filme "${filme.titulo}"?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancelar'),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Excluir'),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  onDismissed: (direction) async {
+                    final idRemovido = filme.id;
+                    setState(() {
+                      filmes.removeAt(index);
+                    });
+                    try {
+                      await _servicoFilme.deletarFilme(idRemovido);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Filme excluído com sucesso!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Erro ao excluir filme: $e'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                      _carregarFilmes();
+                    }
+                  },
                   child: GestureDetector(
                     onTap: () => _abrirDetalhesFilme(filmes[index]),
                     child: CartaoFilme(filme: filmes[index]),
