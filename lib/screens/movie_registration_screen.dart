@@ -8,7 +8,12 @@ import '../constants/movie_constants.dart';
 import '../services/movie_service.dart';
 
 class MovieRegistrationScreen extends StatefulWidget {
-  const MovieRegistrationScreen({Key? key}) : super(key: key);
+  final Movie? initialMovie;
+
+  const MovieRegistrationScreen({
+    Key? key,
+    this.initialMovie,
+  }) : super(key: key);
 
   @override
   State<MovieRegistrationScreen> createState() => _MovieRegistrationScreenState();
@@ -28,11 +33,24 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
   String _movieId = '';
   bool _imageLoaded = false;
   String? _imageError;
+  final MovieService _movieService = MovieService();
 
   @override
   void initState() {
     super.initState();
-    _generateMovieId();
+    if (widget.initialMovie != null) {
+      _movieId = widget.initialMovie!.id;
+      _titleController.text = widget.initialMovie!.title;
+      _imageUrlController.text = widget.initialMovie!.imageUrl;
+      _durationController.text = widget.initialMovie!.duration;
+      _descriptionController.text = widget.initialMovie!.description;
+      _yearController.text = widget.initialMovie!.year.toString();
+      _ratingController.text = widget.initialMovie!.rating.toString();
+      _selectedGenre = widget.initialMovie!.genre;
+      _selectedAgeRating = widget.initialMovie!.ageRating;
+    } else {
+      _generateMovieId();
+    }
     _imageUrlController.addListener(_onImageUrlChanged);
   }
 
@@ -66,7 +84,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     _generateMovieId();
   }
 
-  void _saveMovie() async {
+  Future<void> _saveMovie() async {
     if (_formKey.currentState!.validate()) {
       try {
         final movie = Movie(
@@ -81,8 +99,11 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
           description: _descriptionController.text.trim(),
         );
         
-        final movieService = MovieService();
-        await movieService.createMovie(movie);
+        if (widget.initialMovie != null) {
+          await _movieService.updateMovie(movie);
+        } else {
+          await _movieService.createMovie(movie);
+        }
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -91,7 +112,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 8),
-                  Text('Filme "${movie.title}" cadastrado com sucesso!'),
+                  Text('Filme "${movie.title}" ${widget.initialMovie != null ? 'atualizado' : 'cadastrado'} com sucesso!'),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -99,7 +120,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
               behavior: SnackBarBehavior.floating,
             ),
           );
-          _clearForm();
+          Navigator.pop(context, true);
         }
       } catch (e) {
         if (mounted) {
@@ -109,7 +130,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
                 children: [
                   const Icon(Icons.error, color: Colors.white),
                   const SizedBox(width: 8),
-                  Text('Erro ao cadastrar filme: ${e.toString()}'),
+                  Text('Erro ao ${widget.initialMovie != null ? 'atualizar' : 'cadastrar'} filme: ${e.toString()}'),
                 ],
               ),
               backgroundColor: Colors.red,
@@ -127,7 +148,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Cadastro de Filme'),
+        title: Text(widget.initialMovie != null ? 'Editar Filme' : 'Cadastro de Filme'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         elevation: 0,

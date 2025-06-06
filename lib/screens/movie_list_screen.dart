@@ -4,6 +4,7 @@ import '../models/movie.dart';
 import '../widgets/movie_card.dart';
 import '../services/movie_service.dart';
 import 'movie_registration_screen.dart';
+import 'movie_details_screen.dart';
 
 class MovieListScreen extends StatefulWidget {
   const MovieListScreen({Key? key}) : super(key: key);
@@ -52,6 +53,15 @@ class _MovieListScreenState extends State<MovieListScreen> {
     if (result == true) {
       _loadMovies();
     }
+  }
+
+  void _openMovieDetails(Movie movie) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MovieDetailsScreen(movie: movie),
+      ),
+    );
   }
 
   @override
@@ -180,7 +190,10 @@ class _MovieListScreenState extends State<MovieListScreen> {
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
-                  child: MovieCard(movie: movies[index]),
+                  child: GestureDetector(
+                    onTap: () => _openMovieDetails(movies[index]),
+                    child: MovieCard(movie: movies[index]),
+                  ),
                 );
               },
             );
