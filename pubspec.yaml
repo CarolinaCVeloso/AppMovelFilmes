@@ -1,19 +1,32 @@
-name: app_movel
-description: "A new Flutter project."
-publish_to: 'none'
-version: 0.1.0
+name: appmovelfilmes
+description: App para gerenciamento de filmes
+version: 1.0.0+1
 
 environment:
-  sdk: ^3.7.0
+  sdk: '>=2.17.0 <4.0.0'
+  flutter: ">=3.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
+  # Gerenciamento de estado
+  provider: ^6.0.0
+  
+  # Banco de dados
+  sqflite: ^2.2.8
+  path: ^1.8.0
+  
+  # Rating/Avaliação
+  flutter_rating_bar: ^4.0.1
+  smooth_star_rating_null_safety: ^1.0.4
+  
+  # UI
+  cupertino_icons: ^1.0.2
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
