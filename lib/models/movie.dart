@@ -1,91 +1,91 @@
 // lib/models/movie.dart
-class Movie {
+class Filme {
   final String id;
-  final String title;
-  final String imageUrl;
-  final String genre;
-  final String ageRating;
-  final String duration;
-  final int year;
-  final double rating;
-  final String description;
+  final String titulo;
+  final String urlImagem;
+  final String genero;
+  final String faixaEtaria;
+  final String duracao;
+  final int ano;
+  final double pontuacao;
+  final String descricao;
 
-  Movie({
+  Filme({
     required this.id,
-    required this.title,
-    required this.imageUrl,
-    required this.genre,
-    required this.ageRating,
-    required this.duration,
-    required this.year,
-    required this.rating,
-    required this.description,
+    required this.titulo,
+    required this.urlImagem,
+    required this.genero,
+    required this.faixaEtaria,
+    required this.duracao,
+    required this.ano,
+    required this.pontuacao,
+    required this.descricao,
   });
 
   // Converter para JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'title': title,
-      'imageUrl': imageUrl,
-      'genre': genre,
-      'ageRating': ageRating,
-      'duration': duration,
-      'year': year,
-      'rating': rating,
-      'description': description,
+      'titulo': titulo,
+      'urlImagem': urlImagem,
+      'genero': genero,
+      'faixaEtaria': faixaEtaria,
+      'duracao': duracao,
+      'ano': ano,
+      'pontuacao': pontuacao,
+      'descricao': descricao,
     };
   }
 
   // Criar instância a partir de JSON
-  factory Movie.fromJson(Map<String, dynamic> json) {
-    return Movie(
+  factory Filme.fromJson(Map<String, dynamic> json) {
+    return Filme(
       id: json['id'] ?? '',
-      title: json['title'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
-      genre: json['genre'] ?? '',
-      ageRating: json['ageRating'] ?? '',
-      duration: json['duration'] ?? '',
-      year: json['year'] ?? 0,
-      rating: (json['rating'] ?? 0.0).toDouble(),
-      description: json['description'] ?? '',
+      titulo: json['titulo'] ?? '',
+      urlImagem: json['urlImagem'] ?? '',
+      genero: json['genero'] ?? '',
+      faixaEtaria: json['faixaEtaria'] ?? '',
+      duracao: json['duracao'] ?? '',
+      ano: json['ano'] ?? 0,
+      pontuacao: (json['pontuacao'] ?? 0.0).toDouble(),
+      descricao: json['descricao'] ?? '',
     );
   }
 
   // Criar cópia com modificações
-  Movie copyWith({
+  Filme copyWith({
     String? id,
-    String? title,
-    String? imageUrl,
-    String? genre,
-    String? ageRating,
-    String? duration,
-    int? year,
-    double? rating,
-    String? description,
+    String? titulo,
+    String? urlImagem,
+    String? genero,
+    String? faixaEtaria,
+    String? duracao,
+    int? ano,
+    double? pontuacao,
+    String? descricao,
   }) {
-    return Movie(
+    return Filme(
       id: id ?? this.id,
-      title: title ?? this.title,
-      imageUrl: imageUrl ?? this.imageUrl,
-      genre: genre ?? this.genre,
-      ageRating: ageRating ?? this.ageRating,
-      duration: duration ?? this.duration,
-      year: year ?? this.year,
-      rating: rating ?? this.rating,
-      description: description ?? this.description,
+      titulo: titulo ?? this.titulo,
+      urlImagem: urlImagem ?? this.urlImagem,
+      genero: genero ?? this.genero,
+      faixaEtaria: faixaEtaria ?? this.faixaEtaria,
+      duracao: duracao ?? this.duracao,
+      ano: ano ?? this.ano,
+      pontuacao: pontuacao ?? this.pontuacao,
+      descricao: descricao ?? this.descricao,
     );
   }
 
   @override
   String toString() {
-    return 'Movie(id: $id, title: $title, genre: $genre, year: $year)';
+    return 'Filme(id: $id, titulo: $titulo, genero: $genero, ano: $ano)';
   }
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Movie && other.id == id;
+    return other is Filme && other.id == id;
   }
 
   @override

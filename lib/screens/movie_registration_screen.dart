@@ -7,104 +7,106 @@ import '../utils/form_validators.dart';
 import '../constants/movie_constants.dart';
 import '../services/movie_service.dart';
 
-class MovieRegistrationScreen extends StatefulWidget {
-  final Movie? initialMovie;
+class TelaCadastroFilme extends StatefulWidget {
+  final Filme? filmeInicial;
 
-  const MovieRegistrationScreen({
+  const TelaCadastroFilme({
     Key? key,
-    this.initialMovie,
+    this.filmeInicial,
   }) : super(key: key);
 
   @override
-  State<MovieRegistrationScreen> createState() => _MovieRegistrationScreenState();
+  State<TelaCadastroFilme> createState() => _TelaCadastroFilmeState();
 }
 
-class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
+class _TelaCadastroFilmeState extends State<TelaCadastroFilme> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _imageUrlController = TextEditingController();
-  final _durationController = TextEditingController();
-  final _descriptionController = TextEditingController();
-  final _yearController = TextEditingController();
-  final _ratingController = TextEditingController();
+  final _tituloController = TextEditingController();
+  final _urlImagemController = TextEditingController();
+  final _duracaoController = TextEditingController();
+  final _descricaoController = TextEditingController();
+  final _anoController = TextEditingController();
+  final _pontuacaoController = TextEditingController();
 
-  String? _selectedGenre;
-  String? _selectedAgeRating;
-  String _movieId = '';
-  bool _imageLoaded = false;
-  String? _imageError;
-  final MovieService _movieService = MovieService();
+  String? _generoSelecionado;
+  String? _faixaEtariaSelecionada;
+  String _idFilme = '';
+  bool _imagemCarregada = false;
+  String? _erroImagem;
+  final FilmeService _servicoFilme = FilmeService();
 
   @override
   void initState() {
     super.initState();
-    if (widget.initialMovie != null) {
-      _movieId = widget.initialMovie!.id;
-      _titleController.text = widget.initialMovie!.title;
-      _imageUrlController.text = widget.initialMovie!.imageUrl;
-      _durationController.text = widget.initialMovie!.duration;
-      _descriptionController.text = widget.initialMovie!.description;
-      _yearController.text = widget.initialMovie!.year.toString();
-      _ratingController.text = widget.initialMovie!.rating.toString();
-      _selectedGenre = widget.initialMovie!.genre;
-      _selectedAgeRating = widget.initialMovie!.ageRating;
+    if (widget.filmeInicial != null) {
+      _idFilme = widget.filmeInicial!.id;
+      _tituloController.text = widget.filmeInicial!.titulo;
+      _urlImagemController.text = widget.filmeInicial!.urlImagem;
+      _duracaoController.text = widget.filmeInicial!.duracao;
+      _descricaoController.text = widget.filmeInicial!.descricao;
+      _anoController.text = widget.filmeInicial!.ano.toString();
+      _pontuacaoController.text = widget.filmeInicial!.pontuacao.toString();
+      if (MovieConstants.genres.contains(widget.filmeInicial!.genero)) {
+        _generoSelecionado = widget.filmeInicial!.genero;
+      } else {
+        _generoSelecionado = null;
+      }
+      _faixaEtariaSelecionada = widget.filmeInicial!.faixaEtaria;
     } else {
-      _generateMovieId();
+      _gerarIdFilme();
     }
-    _imageUrlController.addListener(_onImageUrlChanged);
+    _urlImagemController.addListener(_aoAlterarUrlImagem);
   }
 
-  void _generateMovieId() {
-    _movieId = 'FILM_${DateTime.now().millisecondsSinceEpoch}';
+  void _gerarIdFilme() {
+    _idFilme = 'FILM_${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  void _onImageUrlChanged() {
-    if (_imageUrlController.text.isNotEmpty) {
+  void _aoAlterarUrlImagem() {
+    if (_urlImagemController.text.isNotEmpty) {
       setState(() {
-        _imageLoaded = false;
-        _imageError = null;
+        _imagemCarregada = false;
+        _erroImagem = null;
       });
     }
   }
 
-  void _clearForm() {
+  void _limparFormulario() {
     _formKey.currentState?.reset();
-    _titleController.clear();
-    _imageUrlController.clear();
-    _durationController.clear();
-    _descriptionController.clear();
-    _yearController.clear();
-    _ratingController.clear();
+    _tituloController.clear();
+    _urlImagemController.clear();
+    _duracaoController.clear();
+    _descricaoController.clear();
+    _anoController.clear();
+    _pontuacaoController.clear();
     setState(() {
-      _selectedGenre = null;
-      _selectedAgeRating = null;
-      _imageLoaded = false;
-      _imageError = null;
+      _generoSelecionado = null;
+      _faixaEtariaSelecionada = null;
+      _imagemCarregada = false;
+      _erroImagem = null;
     });
-    _generateMovieId();
+    _gerarIdFilme();
   }
 
-  Future<void> _saveMovie() async {
+  Future<void> _salvarFilme() async {
     if (_formKey.currentState!.validate()) {
       try {
-        final movie = Movie(
-          id: _movieId,
-          title: _titleController.text.trim(),
-          imageUrl: _imageUrlController.text.trim(),
-          genre: _selectedGenre!,
-          ageRating: _selectedAgeRating!,
-          duration: _durationController.text.trim(),
-          year: int.parse(_yearController.text),
-          rating: double.parse(_ratingController.text),
-          description: _descriptionController.text.trim(),
+        final filme = Filme(
+          id: _idFilme,
+          titulo: _tituloController.text.trim(),
+          urlImagem: _urlImagemController.text.trim(),
+          genero: _generoSelecionado!,
+          faixaEtaria: _faixaEtariaSelecionada!,
+          duracao: _duracaoController.text.trim(),
+          ano: int.parse(_anoController.text),
+          pontuacao: double.parse(_pontuacaoController.text),
+          descricao: _descricaoController.text.trim(),
         );
-        
-        if (widget.initialMovie != null) {
-          await _movieService.updateMovie(movie);
+        if (widget.filmeInicial != null) {
+          await _servicoFilme.atualizarFilme(filme);
         } else {
-          await _movieService.createMovie(movie);
+          await _servicoFilme.criarFilme(filme);
         }
-        
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -112,7 +114,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
                 children: [
                   const Icon(Icons.check_circle, color: Colors.white),
                   const SizedBox(width: 8),
-                  Text('Filme "${movie.title}" ${widget.initialMovie != null ? 'atualizado' : 'cadastrado'} com sucesso!'),
+                  Text('Filme "${filme.titulo}" ${widget.filmeInicial != null ? 'atualizado' : 'cadastrado'} com sucesso!'),
                 ],
               ),
               backgroundColor: Colors.green,
@@ -130,7 +132,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
                 children: [
                   const Icon(Icons.error, color: Colors.white),
                   const SizedBox(width: 8),
-                  Text('Erro ao ${widget.initialMovie != null ? 'atualizar' : 'cadastrar'} filme: ${e.toString()}'),
+                  Text('Erro ao ${widget.filmeInicial != null ? 'atualizar' : 'cadastrar'} filme: ${e.toString()}'),
                 ],
               ),
               backgroundColor: Colors.red,
@@ -148,7 +150,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: Text(widget.initialMovie != null ? 'Editar Filme' : 'Cadastro de Filme'),
+        title: Text(widget.filmeInicial != null ? 'Editar Filme' : 'Cadastro de Filme'),
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -168,19 +170,19 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildHeader(),
+                  _cabecalho(),
                   const SizedBox(height: 24),
-                  _buildImageSection(),
+                  _secaoImagem(),
                   const SizedBox(height: 24),
-                  _buildBasicInfoSection(),
+                  _secaoInfoBasica(),
                   const SizedBox(height: 16),
-                  _buildCategorySection(),
+                  _secaoCategoria(),
                   const SizedBox(height: 16),
-                  _buildDetailsSection(),
+                  _secaoDetalhes(),
                   const SizedBox(height: 16),
-                  _buildDescriptionSection(),
+                  _secaoDescricao(),
                   const SizedBox(height: 32),
-                  _buildActionButtons(),
+                  _botoesAcoes(),
                 ],
               ),
             ),
@@ -190,7 +192,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _cabecalho() {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -225,7 +227,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
                   ),
                 ),
                 Text(
-                  _movieId,
+                  _idFilme,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.deepPurple,
@@ -240,7 +242,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     );
   }
 
-  Widget _buildImageSection() {
+  Widget _secaoImagem() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -254,7 +256,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          controller: _imageUrlController,
+          controller: _urlImagemController,
           decoration: InputDecoration(
             labelText: 'URL da Imagem',
             hintText: MovieConstants.imageUrlPlaceholder,
@@ -267,22 +269,27 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
           validator: FormValidators.validateImageUrl,
         ),
         const SizedBox(height: 12),
-        ImagePreviewWidget(
-          imageUrl: _imageUrlController.text,
-          onImageLoaded: () => setState(() {
-            _imageLoaded = true;
-            _imageError = null;
-          }),
-          onImageError: (error) => setState(() {
-            _imageLoaded = false;
-            _imageError = error;
-          }),
+        ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _urlImagemController,
+          builder: (context, value, child) {
+            return ImagePreviewWidget(
+              imageUrl: value.text,
+              onImageLoaded: () => setState(() {
+                _imagemCarregada = true;
+                _erroImagem = null;
+              }),
+              onImageError: (erro) => setState(() {
+                _imagemCarregada = false;
+                _erroImagem = erro;
+              }),
+            );
+          },
         ),
-        if (_imageError != null)
+        if (_erroImagem != null)
           Padding(
             padding: const EdgeInsets.only(top: 8),
             child: Text(
-              _imageError!,
+              _erroImagem!,
               style: const TextStyle(color: Colors.red, fontSize: 12),
             ),
           ),
@@ -290,7 +297,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     );
   }
 
-  Widget _buildBasicInfoSection() {
+  Widget _secaoInfoBasica() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -304,7 +311,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          controller: _titleController,
+          controller: _tituloController,
           decoration: InputDecoration(
             labelText: 'Título do Filme',
             hintText: MovieConstants.titlePlaceholder,
@@ -314,13 +321,13 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
               borderSide: BorderSide(color: Colors.deepPurple, width: 2),
             ),
           ),
-          validator: (value) => FormValidators.validateRequired(value, 'Título'),
+          validator: (valor) => FormValidators.validateRequired(valor, 'Título'),
         ),
       ],
     );
   }
 
-  Widget _buildCategorySection() {
+  Widget _secaoCategoria() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -337,7 +344,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: _selectedGenre,
+                value: _generoSelecionado,
                 decoration: const InputDecoration(
                   labelText: 'Gênero',
                   prefixIcon: Icon(Icons.category, color: Colors.deepPurple),
@@ -346,19 +353,19 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
                     borderSide: BorderSide(color: Colors.deepPurple, width: 2),
                   ),
                 ),
-                items: MovieConstants.genres.map((String genre) {
+                items: MovieConstants.genres.map((String genero) {
                   return DropdownMenuItem<String>(
-                    value: genre,
-                    child: Text(genre),
+                    value: genero,
+                    child: Text(genero),
                   );
                 }).toList(),
-                onChanged: (String? newValue) {
+                onChanged: (String? novoValor) {
                   setState(() {
-                    _selectedGenre = newValue;
+                    _generoSelecionado = novoValor;
                   });
                 },
-                validator: (value) {
-                  if (value == null) {
+                validator: (valor) {
+                  if (valor == null) {
                     return 'Selecione um gênero';
                   }
                   return null;
@@ -368,7 +375,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: _selectedAgeRating,
+                value: _faixaEtariaSelecionada,
                 decoration: const InputDecoration(
                   labelText: 'Faixa Etária',
                   prefixIcon: Icon(Icons.family_restroom, color: Colors.deepPurple),
@@ -377,19 +384,19 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
                     borderSide: BorderSide(color: Colors.deepPurple, width: 2),
                   ),
                 ),
-                items: MovieConstants.ageRatings.map((String rating) {
+                items: MovieConstants.ageRatings.map((String faixa) {
                   return DropdownMenuItem<String>(
-                    value: rating,
-                    child: Text(rating),
+                    value: faixa,
+                    child: Text(faixa),
                   );
                 }).toList(),
-                onChanged: (String? newValue) {
+                onChanged: (String? novoValor) {
                   setState(() {
-                    _selectedAgeRating = newValue;
+                    _faixaEtariaSelecionada = novoValor;
                   });
                 },
-                validator: (value) {
-                  if (value == null) {
+                validator: (valor) {
+                  if (valor == null) {
                     return 'Selecione a faixa etária';
                   }
                   return null;
@@ -402,7 +409,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     );
   }
 
-  Widget _buildDetailsSection() {
+  Widget _secaoDetalhes() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -419,7 +426,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
           children: [
             Expanded(
               child: TextFormField(
-                controller: _durationController,
+                controller: _duracaoController,
                 decoration: InputDecoration(
                   labelText: 'Duração',
                   hintText: MovieConstants.durationPlaceholder,
@@ -435,7 +442,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
             const SizedBox(width: 16),
             Expanded(
               child: TextFormField(
-                controller: _yearController,
+                controller: _anoController,
                 decoration: InputDecoration(
                   labelText: 'Ano',
                   hintText: MovieConstants.yearPlaceholder,
@@ -457,7 +464,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
         ),
         const SizedBox(height: 16),
         TextFormField(
-          controller: _ratingController,
+          controller: _pontuacaoController,
           decoration: InputDecoration(
             labelText: 'Pontuação (0-10)',
             hintText: MovieConstants.ratingPlaceholder,
@@ -478,7 +485,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     );
   }
 
-  Widget _buildDescriptionSection() {
+  Widget _secaoDescricao() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -492,7 +499,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          controller: _descriptionController,
+          controller: _descricaoController,
           decoration: InputDecoration(
             labelText: 'Descrição do Filme',
             hintText: MovieConstants.descriptionPlaceholder,
@@ -505,8 +512,8 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
           ),
           maxLines: 4,
           maxLength: MovieConstants.maxDescriptionLength,
-          validator: (value) => FormValidators.validateDescription(
-            value, 
+          validator: (valor) => FormValidators.validateDescription(
+            valor, 
             maxLength: MovieConstants.maxDescriptionLength,
           ),
         ),
@@ -514,12 +521,12 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
     );
   }
 
-  Widget _buildActionButtons() {
+  Widget _botoesAcoes() {
     return Row(
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: _clearForm,
+            onPressed: _limparFormulario,
             icon: const Icon(Icons.clear),
             label: const Text('Limpar'),
             style: OutlinedButton.styleFrom(
@@ -533,7 +540,7 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
         Expanded(
           flex: 2,
           child: ElevatedButton.icon(
-            onPressed: _saveMovie,
+            onPressed: _salvarFilme,
             icon: const Icon(Icons.save),
             label: const Text('Salvar Filme'),
             style: ElevatedButton.styleFrom(
@@ -553,12 +560,12 @@ class _MovieRegistrationScreenState extends State<MovieRegistrationScreen> {
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _imageUrlController.dispose();
-    _durationController.dispose();
-    _descriptionController.dispose();
-    _yearController.dispose();
-    _ratingController.dispose();
+    _tituloController.dispose();
+    _urlImagemController.dispose();
+    _duracaoController.dispose();
+    _descricaoController.dispose();
+    _anoController.dispose();
+    _pontuacaoController.dispose();
     super.dispose();
   }
 }

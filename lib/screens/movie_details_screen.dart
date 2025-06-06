@@ -4,40 +4,40 @@ import '../models/movie.dart';
 import '../services/movie_service.dart';
 import 'movie_registration_screen.dart';
 
-class MovieDetailsScreen extends StatefulWidget {
-  final Movie movie;
+class TelaDetalhesFilme extends StatefulWidget {
+  final Filme filme;
 
-  const MovieDetailsScreen({
+  const TelaDetalhesFilme({
     Key? key,
-    required this.movie,
+    required this.filme,
   }) : super(key: key);
 
   @override
-  State<MovieDetailsScreen> createState() => _MovieDetailsScreenState();
+  State<TelaDetalhesFilme> createState() => _TelaDetalhesFilmeState();
 }
 
-class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
-  late Movie _movie;
-  final MovieService _movieService = MovieService();
-  bool _isLoading = false;
+class _TelaDetalhesFilmeState extends State<TelaDetalhesFilme> {
+  late Filme _filme;
+  final FilmeService _servicoFilme = FilmeService();
+  bool _carregando = false;
 
   @override
   void initState() {
     super.initState();
-    _movie = widget.movie;
+    _filme = widget.filme;
   }
 
-  Future<void> _refreshMovie() async {
-    setState(() => _isLoading = true);
+  Future<void> _atualizarFilme() async {
+    setState(() => _carregando = true);
     try {
-      final movies = await _movieService.getMovies();
-      final updatedMovie = movies.firstWhere((m) => m.id == _movie.id);
+      final filmes = await _servicoFilme.buscarFilmes();
+      final filmeAtualizado = filmes.firstWhere((m) => m.id == _filme.id);
       setState(() {
-        _movie = updatedMovie;
-        _isLoading = false;
+        _filme = filmeAtualizado;
+        _carregando = false;
       });
     } catch (e) {
-      setState(() => _isLoading = false);
+      setState(() => _carregando = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -49,16 +49,16 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     }
   }
 
-  Future<void> _editMovie() async {
-    final result = await Navigator.push(
+  Future<void> _editarFilme() async {
+    final resultado = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => MovieRegistrationScreen(initialMovie: _movie),
+        builder: (_) => TelaCadastroFilme(filmeInicial: _filme),
       ),
     );
 
-    if (result == true) {
-      _refreshMovie();
+    if (resultado == true) {
+      _atualizarFilme();
     }
   }
 
@@ -76,7 +76,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 fit: StackFit.expand,
                 children: [
                   Image.network(
-                    _movie.imageUrl,
+                    _filme.urlImagem,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: Colors.grey[300],
@@ -103,7 +103,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             actions: [
               IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: _editMovie,
+                onPressed: _editarFilme,
                 tooltip: 'Editar filme',
               ),
             ],
@@ -115,7 +115,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    _movie.title,
+                    _filme.titulo,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -127,7 +127,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       Icon(Icons.movie, size: 16, color: Colors.grey[600]),
                       const SizedBox(width: 4),
                       Text(
-                        _movie.genre,
+                        _filme.genero,
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.grey[800],
@@ -143,11 +143,11 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildInfoRow(Icons.access_time, 'Duração', _movie.duration),
+                          _infoLinha(Icons.access_time, 'Duração', _filme.duracao),
                           const SizedBox(height: 8),
-                          _buildInfoRow(Icons.person_outline, 'Faixa Etária', '${_movie.ageRating} anos'),
+                          _infoLinha(Icons.person_outline, 'Faixa Etária', _filme.faixaEtaria),
                           const SizedBox(height: 8),
-                          _buildInfoRow(Icons.calendar_today, 'Ano', _movie.year.toString()),
+                          _infoLinha(Icons.calendar_today, 'Ano', _filme.ano.toString()),
                           const SizedBox(height: 8),
                           Row(
                             children: [
@@ -162,7 +162,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               ),
                               const SizedBox(width: 8),
                               RatingBarIndicator(
-                                rating: _movie.rating > 5 ? 5 : _movie.rating,
+                                rating: _filme.pontuacao > 5 ? 5 : _filme.pontuacao,
                                 itemBuilder: (context, index) => const Icon(
                                   Icons.star,
                                   color: Colors.amber,
@@ -191,7 +191,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Text(
-                        _movie.description,
+                        _filme.descricao,
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.grey[800],
@@ -209,20 +209,20 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
+  Widget _infoLinha(IconData icone, String rotulo, String valor) {
     return Row(
       children: [
-        Icon(icon, size: 16, color: Colors.grey[600]),
+        Icon(icone, size: 16, color: Colors.grey[600]),
         const SizedBox(width: 4),
         Text(
-          '$label: ',
+          '$rotulo: ',
           style: TextStyle(
             fontSize: 16,
             color: Colors.grey[800],
           ),
         ),
         Text(
-          value,
+          valor,
           style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,

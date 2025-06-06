@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'screens/movie_list_screen.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const AppPrincipal());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class AppPrincipal extends StatelessWidget {
+  const AppPrincipal({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: MovieListScreen(),
+      home: TelaListaFilmes(),
     );
   }
 }

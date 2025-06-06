@@ -2,136 +2,151 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/movie.dart';
 
-class MovieService {
-  static const String baseUrl = 'https://6842015cd48516d1d35d857a.mockapi.io/api/movies';
+class FilmeService {
+  static const String urlBase = 'https://6842015cd48516d1d35d857a.mockapi.io/api/movies';
 
   // Get all movies
-  Future<List<Movie>> getMovies() async {
+  Future<List<Filme>> buscarFilmes() async {
     try {
-      final response = await http.get(Uri.parse(baseUrl));
-      if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => Movie.fromJson({
-          'id': json['id'],
-          'title': json['nome'],
-          'imageUrl': json['url_imagem'],
-          'genre': json['genero'],
-          'ageRating': json['faixa_etaria'].toString(),
-          'duration': json['duracao'],
-          'year': json['ano'],
-          'rating': (json['pontuacao'] ?? 0.0).toDouble() / 20, // Converte de 0-100 para 0-5
-          'description': json['descricao'],
-        })).toList();
+      final resposta = await http.get(Uri.parse(urlBase));
+      if (resposta.statusCode == 200) {
+        final List<dynamic> dados = json.decode(resposta.body);
+        return dados.map((json) {
+          String faixaEtariaStr;
+          int faixaEtaria = json['faixa_etaria'] ?? 0;
+          if (faixaEtaria == 0) {
+            faixaEtariaStr = 'Livre';
+          } else {
+            faixaEtariaStr = '$faixaEtaria anos';
+          }
+          return Filme.fromJson({
+            'id': json['id'],
+            'titulo': json['nome'],
+            'urlImagem': json['url_imagem'],
+            'genero': json['genero'],
+            'faixaEtaria': faixaEtariaStr,
+            'duracao': json['duracao'],
+            'ano': json['ano'],
+            'pontuacao': (json['pontuacao'] ?? 0.0).toDouble() / 20,
+            'descricao': json['descricao'],
+          });
+        }).toList();
       }
-      throw Exception('Failed to load movies');
+      throw Exception('Erro ao carregar filmes');
     } catch (e) {
-      throw Exception('Error: $e');
+      throw Exception('Erro: $e');
     }
   }
 
   // Create a new movie
-  Future<Movie> createMovie(Movie movie) async {
+  Future<Filme> criarFilme(Filme filme) async {
     try {
-      // Converter a faixa etária para inteiro
       int faixaEtaria;
-      try {
-        // Remove "anos" e espaços, depois converte para inteiro
-        faixaEtaria = int.parse(movie.ageRating.replaceAll(RegExp(r'[^0-9]'), ''));
-      } catch (e) {
-        faixaEtaria = 0; // valor padrão caso a conversão falhe
+      if (filme.faixaEtaria == 'Livre') {
+        faixaEtaria = 0;
+      } else {
+        faixaEtaria = int.parse(filme.faixaEtaria.replaceAll(RegExp(r'[^0-9]'), ''));
       }
-
-      final response = await http.post(
-        Uri.parse(baseUrl),
+      final resposta = await http.post(
+        Uri.parse(urlBase),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'nome': movie.title,
-          'url_imagem': movie.imageUrl,
-          'descricao': movie.description,
+          'nome': filme.titulo,
+          'url_imagem': filme.urlImagem,
+          'descricao': filme.descricao,
           'faixa_etaria': faixaEtaria,
-          'genero': movie.genre,
-          'duracao': movie.duration,
-          'pontuacao': (movie.rating * 20).round(), // Converte para escala de 0-100
-          'ano': movie.year,
+          'genero': filme.genero,
+          'duracao': filme.duracao,
+          'pontuacao': (filme.pontuacao * 20).round(),
+          'ano': filme.ano,
         }),
       );
-
-      if (response.statusCode == 201) {
-        final data = json.decode(response.body);
-        return Movie.fromJson({
+      if (resposta.statusCode == 201) {
+        final data = json.decode(resposta.body);
+        String faixaEtariaStr;
+        int faixaEtaria = data['faixa_etaria'] ?? 0;
+        if (faixaEtaria == 0) {
+          faixaEtariaStr = 'Livre';
+        } else {
+          faixaEtariaStr = '$faixaEtaria anos';
+        }
+        return Filme.fromJson({
           'id': data['id'],
-          'title': data['nome'],
-          'imageUrl': data['url_imagem'],
-          'genre': data['genero'],
-          'ageRating': data['faixa_etaria'].toString(),
-          'duration': data['duracao'],
-          'year': data['ano'],
-          'rating': (data['pontuacao'] ?? 0.0).toDouble() / 20, // Converte de volta para escala 0-5
-          'description': data['descricao'],
+          'titulo': data['nome'],
+          'urlImagem': data['url_imagem'],
+          'genero': data['genero'],
+          'faixaEtaria': faixaEtariaStr,
+          'duracao': data['duracao'],
+          'ano': data['ano'],
+          'pontuacao': (data['pontuacao'] ?? 0.0).toDouble() / 20,
+          'descricao': data['descricao'],
         });
       }
-      throw Exception('Failed to create movie');
+      throw Exception('Erro ao criar filme');
     } catch (e) {
-      throw Exception('Error: $e');
+      throw Exception('Erro: $e');
     }
   }
 
   // Update a movie
-  Future<Movie> updateMovie(Movie movie) async {
+  Future<Filme> atualizarFilme(Filme filme) async {
     try {
-      // Converter a faixa etária para inteiro
       int faixaEtaria;
-      try {
-        // Remove "anos" e espaços, depois converte para inteiro
-        faixaEtaria = int.parse(movie.ageRating.replaceAll(RegExp(r'[^0-9]'), ''));
-      } catch (e) {
-        faixaEtaria = 0; // valor padrão caso a conversão falhe
+      if (filme.faixaEtaria == 'Livre') {
+        faixaEtaria = 0;
+      } else {
+        faixaEtaria = int.parse(filme.faixaEtaria.replaceAll(RegExp(r'[^0-9]'), ''));
       }
-
-      final response = await http.put(
-        Uri.parse('$baseUrl/${movie.id}'),
+      final resposta = await http.put(
+        Uri.parse('$urlBase/${filme.id}'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({
-          'nome': movie.title,
-          'url_imagem': movie.imageUrl,
-          'descricao': movie.description,
+          'nome': filme.titulo,
+          'url_imagem': filme.urlImagem,
+          'descricao': filme.descricao,
           'faixa_etaria': faixaEtaria,
-          'genero': movie.genre,
-          'duracao': movie.duration,
-          'pontuacao': (movie.rating * 20).round(), // Converte para escala de 0-100
-          'ano': movie.year,
+          'genero': filme.genero,
+          'duracao': filme.duracao,
+          'pontuacao': (filme.pontuacao * 20).round(),
+          'ano': filme.ano,
         }),
       );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return Movie.fromJson({
+      if (resposta.statusCode == 200) {
+        final data = json.decode(resposta.body);
+        String faixaEtariaStr;
+        int faixaEtaria = data['faixa_etaria'] ?? 0;
+        if (faixaEtaria == 0) {
+          faixaEtariaStr = 'Livre';
+        } else {
+          faixaEtariaStr = '$faixaEtaria anos';
+        }
+        return Filme.fromJson({
           'id': data['id'],
-          'title': data['nome'],
-          'imageUrl': data['url_imagem'],
-          'genre': data['genero'],
-          'ageRating': data['faixa_etaria'].toString(),
-          'duration': data['duracao'],
-          'year': data['ano'],
-          'rating': (data['pontuacao'] ?? 0.0).toDouble() / 20, // Converte de volta para escala 0-5
-          'description': data['descricao'],
+          'titulo': data['nome'],
+          'urlImagem': data['url_imagem'],
+          'genero': data['genero'],
+          'faixaEtaria': faixaEtariaStr,
+          'duracao': data['duracao'],
+          'ano': data['ano'],
+          'pontuacao': (data['pontuacao'] ?? 0.0).toDouble() / 20,
+          'descricao': data['descricao'],
         });
       }
-      throw Exception('Failed to update movie');
+      throw Exception('Erro ao atualizar filme');
     } catch (e) {
-      throw Exception('Error: $e');
+      throw Exception('Erro: $e');
     }
   }
 
   // Delete a movie
-  Future<void> deleteMovie(String id) async {
+  Future<void> deletarFilme(String id) async {
     try {
-      final response = await http.delete(Uri.parse('$baseUrl/$id'));
-      if (response.statusCode != 200) {
-        throw Exception('Failed to delete movie');
+      final resposta = await http.delete(Uri.parse('$urlBase/$id'));
+      if (resposta.statusCode != 200) {
+        throw Exception('Erro ao deletar filme');
       }
     } catch (e) {
-      throw Exception('Error: $e');
+      throw Exception('Erro: $e');
     }
   }
 }

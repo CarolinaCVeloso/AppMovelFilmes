@@ -6,30 +6,30 @@ import '../services/movie_service.dart';
 import 'movie_registration_screen.dart';
 import 'movie_details_screen.dart';
 
-class MovieListScreen extends StatefulWidget {
-  const MovieListScreen({Key? key}) : super(key: key);
+class TelaListaFilmes extends StatefulWidget {
+  const TelaListaFilmes({Key? key}) : super(key: key);
 
   @override
-  State<MovieListScreen> createState() => _MovieListScreenState();
+  State<TelaListaFilmes> createState() => _TelaListaFilmesState();
 }
 
-class _MovieListScreenState extends State<MovieListScreen> {
-  late Future<List<Movie>> _moviesFuture;
-  final MovieService _movieService = MovieService();
+class _TelaListaFilmesState extends State<TelaListaFilmes> {
+  late Future<List<Filme>> _futuroFilmes;
+  final FilmeService _servicoFilme = FilmeService();
 
   @override
   void initState() {
     super.initState();
-    _loadMovies();
+    _carregarFilmes();
   }
 
-  Future<void> _loadMovies() async {
+  Future<void> _carregarFilmes() async {
     setState(() {
-      _moviesFuture = _movieService.getMovies();
+      _futuroFilmes = _servicoFilme.buscarFilmes();
     });
   }
 
-  void _showGroupInfo() {
+  void _mostrarInfoGrupo() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -45,21 +45,21 @@ class _MovieListScreenState extends State<MovieListScreen> {
     );
   }
 
-  Future<void> _openAddMovie() async {
-    final result = await Navigator.push(
+  Future<void> _abrirCadastroFilme() async {
+    final resultado = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const MovieRegistrationScreen()),
+      MaterialPageRoute(builder: (_) => const TelaCadastroFilme()),
     );
-    if (result == true) {
-      _loadMovies();
+    if (resultado == true) {
+      _carregarFilmes();
     }
   }
 
-  void _openMovieDetails(Movie movie) {
+  void _abrirDetalhesFilme(Filme filme) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => MovieDetailsScreen(movie: movie),
+        builder: (_) => TelaDetalhesFilme(filme: filme),
       ),
     );
   }
@@ -77,15 +77,15 @@ class _MovieListScreenState extends State<MovieListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
-            onPressed: _showGroupInfo,
+            onPressed: _mostrarInfoGrupo,
             tooltip: 'Informações do grupo',
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _loadMovies,
-        child: FutureBuilder<List<Movie>>(
-          future: _moviesFuture,
+        onRefresh: _carregarFilmes,
+        child: FutureBuilder<List<Filme>>(
+          future: _futuroFilmes,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -138,7 +138,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      onPressed: _loadMovies,
+                      onPressed: _carregarFilmes,
                       icon: const Icon(Icons.refresh),
                       label: const Text('Tentar novamente'),
                       style: ElevatedButton.styleFrom(
@@ -151,8 +151,8 @@ class _MovieListScreenState extends State<MovieListScreen> {
               );
             }
 
-            final movies = snapshot.data ?? [];
-            if (movies.isEmpty) {
+            final filmes = snapshot.data ?? [];
+            if (filmes.isEmpty) {
               return Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -186,13 +186,13 @@ class _MovieListScreenState extends State<MovieListScreen> {
 
             return ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: movies.length,
+              itemCount: filmes.length,
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16),
                   child: GestureDetector(
-                    onTap: () => _openMovieDetails(movies[index]),
-                    child: MovieCard(movie: movies[index]),
+                    onTap: () => _abrirDetalhesFilme(filmes[index]),
+                    child: CartaoFilme(filme: filmes[index]),
                   ),
                 );
               },
@@ -201,7 +201,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _openAddMovie,
+        onPressed: _abrirCadastroFilme,
         backgroundColor: Colors.deepPurple,
         elevation: 8,
         child: const Icon(Icons.add),
