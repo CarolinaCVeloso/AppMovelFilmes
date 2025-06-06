@@ -5,6 +5,7 @@ import 'dart:convert';
 import '../models/movie.dart';
 import '../widgets/movie_card.dart';
 import 'movie_registration_screen.dart';
+import 'movie_details_screen.dart';
 
 class MovieListScreen extends StatefulWidget {
   const MovieListScreen({Key? key}) : super(key: key);
@@ -69,6 +70,15 @@ class _MovieListScreenState extends State<MovieListScreen> {
         _moviesFuture = _fetchMovies();
       });
     }
+  }
+
+  void _openMovieDetails(Movie movie) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MovieDetailsScreen(movie: movie),
+      ),
+    );
   }
 
   @override
