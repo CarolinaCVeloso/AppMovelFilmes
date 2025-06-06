@@ -19,7 +19,7 @@ class MovieService {
           'ageRating': json['faixa_etaria'].toString(),
           'duration': json['duracao'],
           'year': json['ano'],
-          'rating': json['pontuacao'].toDouble(),
+          'rating': (json['pontuacao'] ?? 0.0).toDouble() / 20, // Converte de 0-100 para 0-5
           'description': json['descricao'],
         })).toList();
       }
@@ -32,6 +32,15 @@ class MovieService {
   // Create a new movie
   Future<Movie> createMovie(Movie movie) async {
     try {
+      // Converter a faixa etária para inteiro
+      int faixaEtaria;
+      try {
+        // Remove "anos" e espaços, depois converte para inteiro
+        faixaEtaria = int.parse(movie.ageRating.replaceAll(RegExp(r'[^0-9]'), ''));
+      } catch (e) {
+        faixaEtaria = 0; // valor padrão caso a conversão falhe
+      }
+
       final response = await http.post(
         Uri.parse(baseUrl),
         headers: {'Content-Type': 'application/json'},
@@ -39,10 +48,10 @@ class MovieService {
           'nome': movie.title,
           'url_imagem': movie.imageUrl,
           'descricao': movie.description,
-          'faixa_etaria': int.parse(movie.ageRating),
+          'faixa_etaria': faixaEtaria,
           'genero': movie.genre,
           'duracao': movie.duration,
-          'pontuacao': movie.rating,
+          'pontuacao': (movie.rating * 20).round(), // Converte para escala de 0-100
           'ano': movie.year,
         }),
       );
@@ -57,7 +66,7 @@ class MovieService {
           'ageRating': data['faixa_etaria'].toString(),
           'duration': data['duracao'],
           'year': data['ano'],
-          'rating': data['pontuacao'].toDouble(),
+          'rating': (data['pontuacao'] ?? 0.0).toDouble() / 20, // Converte de volta para escala 0-5
           'description': data['descricao'],
         });
       }
@@ -70,6 +79,15 @@ class MovieService {
   // Update a movie
   Future<Movie> updateMovie(Movie movie) async {
     try {
+      // Converter a faixa etária para inteiro
+      int faixaEtaria;
+      try {
+        // Remove "anos" e espaços, depois converte para inteiro
+        faixaEtaria = int.parse(movie.ageRating.replaceAll(RegExp(r'[^0-9]'), ''));
+      } catch (e) {
+        faixaEtaria = 0; // valor padrão caso a conversão falhe
+      }
+
       final response = await http.put(
         Uri.parse('$baseUrl/${movie.id}'),
         headers: {'Content-Type': 'application/json'},
@@ -77,10 +95,10 @@ class MovieService {
           'nome': movie.title,
           'url_imagem': movie.imageUrl,
           'descricao': movie.description,
-          'faixa_etaria': int.parse(movie.ageRating),
+          'faixa_etaria': faixaEtaria,
           'genero': movie.genre,
           'duracao': movie.duration,
-          'pontuacao': movie.rating,
+          'pontuacao': (movie.rating * 20).round(), // Converte para escala de 0-100
           'ano': movie.year,
         }),
       );
@@ -95,7 +113,7 @@ class MovieService {
           'ageRating': data['faixa_etaria'].toString(),
           'duration': data['duracao'],
           'year': data['ano'],
-          'rating': data['pontuacao'].toDouble(),
+          'rating': (data['pontuacao'] ?? 0.0).toDouble() / 20, // Converte de volta para escala 0-5
           'description': data['descricao'],
         });
       }
