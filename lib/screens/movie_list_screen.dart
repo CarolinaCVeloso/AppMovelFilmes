@@ -7,11 +7,11 @@ import '../widgets/movie_card.dart';
 import 'movie_registration_screen.dart';
 import 'movie_details_screen.dart';
 
-class MovieListScreen extends StatefulWidget {
-  const MovieListScreen({Key? key}) : super(key: key);
+class TelaListaFilmes extends StatefulWidget {
+  const TelaListaFilmes({Key? key}) : super(key: key);
 
   @override
-  State<MovieListScreen> createState() => _MovieListScreenState();
+  State<TelaListaFilmes> createState() => _TelaListaFilmesState();
 }
 
 class _MovieListScreenState extends State<MovieListScreen> {
@@ -44,7 +44,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
     }
   }
 
-  void _showGroupInfo() {
+  void _mostrarInfoGrupo() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -60,10 +60,10 @@ class _MovieListScreenState extends State<MovieListScreen> {
     );
   }
 
-  Future<void> _openAddMovie() async {
-    final result = await Navigator.push(
+  Future<void> _abrirCadastroFilme() async {
+    final resultado = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const MovieRegistrationScreen()),
+      MaterialPageRoute(builder: (_) => const TelaCadastroFilme()),
     );
     if (result == true) {
       setState(() {
@@ -72,11 +72,11 @@ class _MovieListScreenState extends State<MovieListScreen> {
     }
   }
 
-  void _openMovieDetails(Movie movie) {
+  void _abrirDetalhesFilme(Filme filme) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => MovieDetailsScreen(movie: movie),
+        builder: (_) => TelaDetalhesFilme(filme: filme),
       ),
     );
   }
@@ -91,7 +91,7 @@ class _MovieListScreenState extends State<MovieListScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.info_outline),
-            onPressed: _showGroupInfo,
+            onPressed: _mostrarInfoGrupo,
             tooltip: 'Informações do grupo',
           ),
         ],
